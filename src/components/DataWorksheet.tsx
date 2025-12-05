@@ -14,21 +14,32 @@ interface DataWorksheetProps {
 jspreadsheet.setLicense(JSPREADSHEET_LICENSE_KEY);
 
 export default function DataWorksheet({ onDataChange, onInstanceReady }: DataWorksheetProps) {
-    const spreadsheetRef = useRef<jspreadsheet.worksheetInstance[] | undefined>(undefined);
+    const spreadsheetRef = useRef<jspreadsheet.spreadsheetInstance | null>(null);
 
-    const handleLoad = (instance: any) => {
-        if (onInstanceReady) {
-            onInstanceReady(instance);
+    const handleLoad = (instance: jspreadsheet.spreadsheetInstance) => {
+        console.log('handleLoad');
+        console.log(instance);
+        spreadsheetRef.current = instance;
+        const worksheet = instance.worksheets?.[0];
+
+        if (onInstanceReady && worksheet) {
+            onInstanceReady(worksheet);
         }
-        if (onDataChange) {
-            onDataChange(instance.getData());
+
+        if (onDataChange && worksheet?.getData) {
+            const raw = worksheet.getData() as unknown;
+            const normalized = Array.isArray(raw) ? (raw as (string | number)[][]) : [];
+            onDataChange(normalized);
         }
     };
 
     const handleChange = () => {
-        if (onDataChange && spreadsheetRef.current?.[0]) {
+        const worksheet = spreadsheetRef.current?.worksheets?.[0];
+        if (!worksheet) return;
+
+        if (onDataChange && worksheet.getData) {
             // jspreadsheet returns a loosely typed value; normalize to 2D array for consumers
-            const raw = spreadsheetRef.current[0].getData() as unknown;
+            const raw = worksheet.getData() as unknown;
             const normalized = Array.isArray(raw) ? (raw as (string | number)[][]) : [];
             onDataChange(normalized);
         }

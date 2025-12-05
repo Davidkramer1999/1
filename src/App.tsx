@@ -3,7 +3,7 @@ import DataWorksheet from './components/DataWorksheet';
 import PivotControls from './components/PivotControls';
 import PivotTableWorksheet from './components/PivotTableWorksheet';
 import type { PivotConfig } from './components/PivotControls';
-import type { JspreadsheetInstance } from 'jspreadsheet';
+import type { jspreadsheet } from '@jspreadsheet/react';
 import { sampleData } from './data/sampleData';
 import './App.css';
 
@@ -14,19 +14,22 @@ function App() {
     groupBy2: 'Subcategory',
     aggregateColumn: 'Sales',
   });
-  const [dataInstance, setDataInstance] = useState<JspreadsheetInstance | null>(null);
+  const [dataInstance, setDataInstance] = useState<jspreadsheet.worksheetInstance | null>(null);
 
   const handleConfigChange = (config: PivotConfig) => {
     setPivotConfig(config);
 
     // Get current data from the data worksheet
-    if (dataInstance) {
-      const freshData = dataInstance.getData();
-      setCurrentData(freshData);
+    if (dataInstance && typeof dataInstance.getData === 'function') {
+      const freshData = dataInstance.getData() as unknown;
+      const normalized = Array.isArray(freshData)
+        ? (freshData as (string | number)[][])
+        : [];
+      setCurrentData(normalized);
     }
   };
 
-  const handleDataInstanceReady = (instance: JspreadsheetInstance) => {
+  const handleDataInstanceReady = (instance: jspreadsheet.worksheetInstance) => {
     setDataInstance(instance);
   };
 
@@ -43,19 +46,19 @@ function App() {
         </section>
 
         <div className="worksheets-container">
-          <section className="worksheet-section">
+          {/* <section className="worksheet-section"> */}
             <DataWorksheet
               onInstanceReady={handleDataInstanceReady}
               onDataChange={setCurrentData}
             />
-          </section>
+          {/* </section> */}
 
-          <section className="worksheet-section">
+          {/* <section className="worksheet-section"> */}
             <PivotTableWorksheet
               sourceData={currentData}
               config={pivotConfig}
             />
-          </section>
+          {/* </section> */}
         </div>
       </main>
     </div>

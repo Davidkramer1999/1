@@ -31,6 +31,8 @@ export default function PivotControls({ onConfigChange }: PivotControlsProps) {
     );
 
     const handleUpdate = () => {
+        console.log('handleUpdate');
+        console.log(groupBy1, groupBy2, aggregateColumn);
         onConfigChange({
             groupBy1,
             groupBy2,
@@ -60,7 +62,7 @@ export default function PivotControls({ onConfigChange }: PivotControlsProps) {
                     onChange={setAggregateColumn}
                     options={aggregateOptions}
                 />
-                <button onClick={handleUpdate}>Update Pivot Table</button>
+                <button onClick={handleUpdate}>Pivot Table</button>
             </div>
         </div>
     );
